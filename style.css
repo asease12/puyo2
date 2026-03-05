@@ -1,59 +1,283 @@
-<!doctype html>
-<html lang="ja">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Puyo Puyo Tsu Inspired v2.1</title>
-    <link rel="stylesheet" href="style.css" />
-  </head>
-  <body>
-    <div class="app">
-      <aside class="panel left">
-        <h1>ぷよぷよ <span class="version-badge">ver.2.1</span></h1>
-        <div class="card controls">
-          <h2>操作</h2>
-          <ul>
-            <li>← / → : 移動</li>
-            <li>↓ : ソフトドロップ</li>
-            <li>Z / X : 回転</li>
-            <li>Space : ハードドロップ</li>
-            <li>P : ポーズ</li>
-            <li>色覚サポート: ぷよ中央に色記号表示</li>
-          </ul>
-        </div>
-      </aside>
+:root {
+  --bg-top: #4f39d5;
+  --bg-bottom: #0d1240;
+  --panel: #ffffffd9;
+  --panel-border: #ffffff66;
+  --text-strong: #1a1756;
+  --text-soft: #4351a6;
+  --accent: #ff5aa0;
+  --accent-2: #4cc4ff;
+  --shadow: 0 16px 40px #09103466;
+}
 
-      <main class="game-shell">
-        <div class="hud">
-          <div class="card score-card">
-            <span class="label">SCORE</span>
-            <span id="score">0</span>
-          </div>
-          <div class="card chain-card">
-            <span class="label">CHAIN</span>
-            <span id="chain">0</span>
-          </div>
-        </div>
-        <canvas id="game" width="420" height="840" aria-label="ぷよぷよ盤面"></canvas>
-        <div class="overlay hidden" id="overlay"></div>
-      </main>
+* {
+  box-sizing: border-box;
+}
 
-      <aside class="panel right">
-        <div class="card actions-card">
-          <h2>GAME</h2>
-          <button id="restartButton" type="button">RESTART</button>
-        </div>
-        <div class="card next-card">
-          <h2>NEXT</h2>
-          <canvas id="next1" width="120" height="160"></canvas>
-        </div>
-        <div class="card next-card">
-          <h2>NEXT2</h2>
-          <canvas id="next2" width="120" height="160"></canvas>
-        </div>
-      </aside>
-    </div>
+body {
+  margin: 0;
+  min-height: 100vh;
+  font-family: 'Segoe UI', 'Hiragino Kaku Gothic ProN', 'Meiryo', sans-serif;
+  color: #fff;
+  background:
+    radial-gradient(circle at 15% 15%, #7e68ff 0%, #7e68ff00 35%),
+    radial-gradient(circle at 85% 10%, #56d8ff99 0%, #56d8ff00 32%),
+    linear-gradient(165deg, var(--bg-top), var(--bg-bottom));
+  display: grid;
+  place-items: center;
+  overflow-x: hidden;
+}
 
-    <script src="game.js"></script>
-  </body>
-</html>
+.aurora {
+  position: fixed;
+  width: 45vmax;
+  height: 45vmax;
+  border-radius: 50%;
+  filter: blur(55px);
+  pointer-events: none;
+  opacity: 0.45;
+}
+
+.aurora-left {
+  top: -12vmax;
+  left: -8vmax;
+  background: #ff8fd4;
+}
+
+.aurora-right {
+  bottom: -16vmax;
+  right: -8vmax;
+  background: #64dfff;
+}
+
+.app {
+  width: min(1260px, calc(100vw - 36px));
+  display: grid;
+  grid-template-columns: 300px 1fr 270px;
+  gap: 20px;
+  align-items: start;
+  padding: 20px;
+  border-radius: 26px;
+  backdrop-filter: blur(14px);
+  background: linear-gradient(140deg, #ffffff1f, #ffffff08);
+  border: 1px solid #ffffff2b;
+  box-shadow: 0 24px 48px #040b2f66;
+}
+
+h1,
+h2,
+p,
+ul {
+  margin: 0;
+}
+
+.panel {
+  display: grid;
+  gap: 14px;
+}
+
+h1 {
+  font-size: 2.1rem;
+  font-weight: 900;
+  letter-spacing: 0.04em;
+  color: #fff7fe;
+  text-shadow: 0 5px 0 #4e277f, 0 10px 16px #19053d70;
+}
+
+.version-badge {
+  display: inline-block;
+  margin-left: 8px;
+  padding: 4px 10px;
+  border-radius: 999px;
+  font-size: 0.74rem;
+  font-weight: 700;
+  vertical-align: middle;
+  background: linear-gradient(140deg, #ffe57c, #ff9c47);
+  color: #4e2b00;
+}
+
+.card {
+  background: var(--panel);
+  border: 1px solid var(--panel-border);
+  border-radius: 20px;
+  padding: 16px;
+  box-shadow: var(--shadow);
+  color: var(--text-strong);
+}
+
+.card h2 {
+  font-size: 0.92rem;
+  letter-spacing: 0.08em;
+  margin-bottom: 10px;
+  color: var(--text-soft);
+}
+
+.controls ul {
+  display: grid;
+  gap: 7px;
+  padding-left: 1.2em;
+  font-weight: 600;
+  font-size: 0.94rem;
+}
+
+.tips p {
+  line-height: 1.5;
+  font-weight: 700;
+  color: #44507f;
+}
+
+.game-shell {
+  display: grid;
+  gap: 14px;
+  justify-items: center;
+}
+
+.hud {
+  width: min(420px, 100%);
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.score-card,
+.chain-card {
+  display: grid;
+  justify-items: center;
+  gap: 4px;
+  background: linear-gradient(150deg, #ffffffef, #def3ff);
+}
+
+.label {
+  font-size: 0.8rem;
+  font-weight: 800;
+  color: #5266be;
+  letter-spacing: 0.1em;
+}
+
+#score,
+#chain {
+  font-size: 2rem;
+  font-weight: 900;
+  color: #24317f;
+  line-height: 1;
+  text-shadow: 0 1px 0 #fff;
+}
+
+.field-wrap {
+  position: relative;
+  border-radius: 22px;
+  padding: 8px;
+  background: linear-gradient(145deg, #ffe2fe99, #a8ceff99);
+  box-shadow: 0 20px 32px #03071f66;
+}
+
+#game {
+  display: block;
+  width: min(420px, calc(100vw - 440px));
+  max-width: 420px;
+  height: auto;
+  border-radius: 14px;
+  background: #050a2f;
+  box-shadow: inset 0 0 0 2px #9ec7ff66;
+}
+
+.overlay {
+  position: absolute;
+  inset: 8px;
+  display: grid;
+  place-items: center;
+  border-radius: 14px;
+  background: #020824c7;
+  color: #ffffff;
+  font-weight: 900;
+  letter-spacing: 0.08em;
+  font-size: clamp(1.8rem, 4vw, 2.4rem);
+  text-shadow: 0 0 12px #78d0ff;
+}
+
+.hidden {
+  display: none;
+}
+
+.actions-card {
+  display: grid;
+  gap: 12px;
+}
+
+#restartButton {
+  border: none;
+  border-radius: 999px;
+  padding: 12px 14px;
+  font-size: 0.95rem;
+  font-weight: 900;
+  letter-spacing: 0.08em;
+  color: #fff;
+  cursor: pointer;
+  background: linear-gradient(145deg, var(--accent), #ff8648);
+  box-shadow: 0 8px 20px #9d24605e;
+  transition: transform 0.12s ease, filter 0.12s ease;
+}
+
+#restartButton:hover {
+  filter: brightness(1.08);
+}
+
+#restartButton:active {
+  transform: translateY(2px);
+}
+
+.next-card {
+  display: grid;
+  justify-items: center;
+  gap: 8px;
+}
+
+#next1,
+#next2 {
+  width: 112px;
+  height: 148px;
+  border-radius: 14px;
+  background: radial-gradient(circle at 18% 10%, #7ad5ff, #30458f);
+  box-shadow: inset 0 0 0 2px #dbf2ffcc;
+}
+
+@media (max-width: 1100px) {
+  .app {
+    grid-template-columns: 1fr;
+    justify-items: center;
+  }
+
+  .panel {
+    width: min(560px, 100%);
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .panel h1 {
+    grid-column: 1 / -1;
+  }
+
+  .right {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  #game {
+    width: min(420px, calc(100vw - 80px));
+  }
+}
+
+@media (max-width: 760px) {
+  body {
+    display: block;
+    padding: 14px;
+  }
+
+  .app {
+    width: 100%;
+    padding: 14px;
+  }
+
+  .panel,
+  .right {
+    grid-template-columns: 1fr;
+  }
+}
