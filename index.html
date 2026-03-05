@@ -7,24 +7,37 @@
     <link rel="stylesheet" href="style.css" />
   </head>
   <body>
+    <div class="aurora aurora-left" aria-hidden="true"></div>
+    <div class="aurora aurora-right" aria-hidden="true"></div>
+
     <div class="app">
       <aside class="panel left">
-        <h1>ぷよぷよ <span class="version-badge">ver.2.1</span></h1>
+        <h1>
+          ぷよぷよ
+          <span class="version-badge">ver.2.1</span>
+        </h1>
+        
         <div class="card controls">
-          <h2>操作</h2>
+          <h2>操作ガイド</h2>
           <ul>
             <li>← / → : 移動</li>
             <li>↓ : ソフトドロップ</li>
             <li>Z / X : 回転</li>
             <li>Space : ハードドロップ</li>
             <li>P : ポーズ</li>
-            <li>色覚サポート: ぷよ中央に色記号表示</li>
+            <li>R : リスタート</li>
+            <li>色覚サポート: ぷよ中央に色記号</li>            
           </ul>
+        </div>
+        
+        <div class="card tips">
+          <h2>プレイのコツ</h2>
+          <p>同色4つで消去。連鎖ボーナスを狙って高得点を目指そう！</p>
         </div>
       </aside>
 
       <main class="game-shell">
-        <div class="hud">
+        <div class="hud" aria-label="ステータス">        
           <div class="card score-card">
             <span class="label">SCORE</span>
             <span id="score">0</span>
@@ -34,8 +47,11 @@
             <span id="chain">0</span>
           </div>
         </div>
-        <canvas id="game" width="420" height="840" aria-label="ぷよぷよ盤面"></canvas>
-        <div class="overlay hidden" id="overlay"></div>
+
+        <div class="field-wrap">
+          <canvas id="game" width="420" height="840" aria-label="ぷよぷよ盤面"></canvas>
+          <div class="overlay hidden" id="overlay"></div>
+        </div>
       </main>
 
       <aside class="panel right">
@@ -43,10 +59,12 @@
           <h2>GAME</h2>
           <button id="restartButton" type="button">RESTART</button>
         </div>
+        
         <div class="card next-card">
           <h2>NEXT</h2>
           <canvas id="next1" width="120" height="160"></canvas>
         </div>
+        
         <div class="card next-card">
           <h2>NEXT2</h2>
           <canvas id="next2" width="120" height="160"></canvas>
