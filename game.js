@@ -4,6 +4,7 @@ const CELL = 60;
 const FPS = 60;
 const BASE_FALL_FRAMES = 40;
 const SOFT_DROP_FRAMES = 3;
+const CLEAR_EFFECT_DURATION_MS = 400;
 const PUYO_STYLES = [
   { fill: '#ff375f', edge: '#ffffff', shade: '#9b1233', mark: 'R' },
   { fill: '#2f80ff', edge: '#ffffff', shade: '#103b86', mark: 'B' },
@@ -233,11 +234,12 @@ function findClearGroups() {
 
 function clearGroups(groups) {
   let removed = 0;
+  const startedAt = performance.now();
   state.clearEffect = [];
   for (const group of groups) {
     for (const [x, y] of group) {
       state.board[y][x] = 0;
-      state.clearEffect.push({ x, y, ttl: 18 });
+      state.clearEffect.push({ x, y, startedAt });
       removed += 1;
     }
   }
@@ -357,10 +359,15 @@ function drawBoard() {
   }
 
   const effectAlpha = Math.max(0, (10 - state.settleFlash) / 10) * 0.7;
+  const now = performance.now();
+  state.clearEffect = state.clearEffect.filter((fx) => now - fx.startedAt < CLEAR_EFFECT_DURATION_MS);
   for (const fx of state.clearEffect) {
-    drawPuyo(ctx, fx.x * CELL, boardTop + fx.y * CELL, 1 + ((fx.x + fx.y) % PUYO_STYLES.length), effectAlpha);
+    const elapsed = now - fx.startedAt;
+    const life = Math.max(0, 1 - elapsed / CLEAR_EFFECT_DURATION_MS);
+    const alpha = effectAlpha * life;
+    drawPuyo(ctx, fx.x * CELL, boardTop + fx.y * CELL, 1 + ((fx.x + fx.y) % PUYO_STYLES.length), alpha);
   }
-
+    
   ctx.fillStyle = '#9fb7ff';
   ctx.font = '24px sans-serif';
   ctx.fillText(`TSU RULE FIELD 6x12  v${VERSION}`, 10, 35);
